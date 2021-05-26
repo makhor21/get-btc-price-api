@@ -7,6 +7,7 @@ const { InfluxDB, Point, HttpError } = require("@influxdata/influxdb-client");
 const { hostname } = require("os");
 
 app.use(logger("dev"));
+app.set("view engine", "ejs");
 
 const writeApi = new InfluxDB({
   url: "https://europe-west1-1.gcp.cloud2.influxdata.com",
@@ -25,41 +26,30 @@ const queryApi = new InfluxDB({
 schedule.scheduleJob("*/5 * * * *", function () {
   axios
     .get("https://api.coincap.io/v2/assets/bitcoin")
-    .then((response) => {
+    .then((res) => {
       const point = new Point("btc")
-        .floatField("price", response.data.data.priceUsd)
+        .floatField("price", res.data.data.priceUsd)
         .timestamp(new Date());
       writeApi.writePoint(point);
       console.log(` ${point.toLineProtocol(writeApi)}`);
     })
-    .catch((error) => {
-      console.log(error);
+    .catch((err) => {
+      console.log("Error: ", err.message);
     });
 });
 
-let result = [];
-
-app.get("/api", (req, res, next) => {
-  const query = `from(bucket: "majid") |> range(start: -3h) |> filter(fn: (r) => r._measurement == "btc")`;
-  queryApi.queryRows(query, {
-    next(row, tableMeta) {
-      const o = tableMeta.toObject(row);
-      let object = {
-        time: o._time,
-        field: o._measurement,
-        price: o._value,
-      };
-      result.push(object);
-    },
-    error(error) {
+app.get("/", (req, res, next) => {
+  const query = `from(bucket: "majid") |> range(start: -3h) |> filter(fn: (r) => r._measurement == "btc") |> sort(columns:["_time"], desc: true)`;
+  queryApi
+    .collectRows(query)
+    .then((data) => {
+      console.log("\nCollect ROWS SUCCESS");
+      return res.render("index", { data });
+    })
+    .catch((error) => {
       console.error(error);
-      console.log("Finished ERROR");
-    },
-    complete() {
-      console.log("Finished SUCCESS");
-    },
-  });
-  return res.json(result);
+      console.log("\nCollect ROWS ERROR");
+    });
 });
 
 const port = 8080;
