@@ -10,8 +10,6 @@ app.set("view engine", "ejs");
 
 app.use("/", apiRouter);
 
-const port = 8080;
-
-app.listen(port, () => {
-  console.log(`Server running on localhost:${port} ...`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on localhost:${process.env.PORT} ...`);
 });
