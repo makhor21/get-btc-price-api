@@ -1,14 +1,14 @@
 const schedule = require("node-schedule");
 const axios = require("axios");
 const { InfluxDB, Point, HttpError } = require("@influxdata/influxdb-client");
-const { hostname } = require("os");
+// const { hostname } = require("os");
 
 const writeApi = new InfluxDB({
   url: process.env.URL,
   token: process.env.TOKEN,
 }).getWriteApi(process.env.ORG, process.env.BUCKET, "ns");
 
-writeApi.useDefaultTags({ location: hostname() });
+writeApi.useDefaultTags({ location: "host2" });
 
 const getApiData = schedule.scheduleJob("*/5 * * * *", function () {
   axios

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const { InfluxDB, Point, HttpError } = require("@influxdata/influxdb-client");
-const { hostname } = require("os");
 
 const queryApi = new InfluxDB({
   url: process.env.URL,
@@ -9,7 +8,7 @@ const queryApi = new InfluxDB({
 }).getQueryApi(process.env.ORG);
 
 router.get("/", (req, res, next) => {
-  const query = `from(bucket: "majid") |> range(start: -3h) |> filter(fn: (r) => r._measurement == "btc") |> sort(columns:["_time"], desc: true)`;
+  const query = `from(bucket: "majid") |> range(start: -3h) |> filter(fn: (r) => r._measurement == "btc") |> filter(fn: (r) => r.location == "host2") |> sort(columns:["_time"], desc: true)`;
   queryApi
     .collectRows(query)
     .then((data) => {
