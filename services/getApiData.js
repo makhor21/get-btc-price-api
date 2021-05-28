@@ -1,7 +1,6 @@
 const schedule = require("node-schedule");
 const axios = require("axios");
-const { InfluxDB, Point, HttpError } = require("@influxdata/influxdb-client");
-// const { hostname } = require("os");
+const { InfluxDB, Point } = require("@influxdata/influxdb-client");
 
 const writeApi = new InfluxDB({
   url: process.env.URL,

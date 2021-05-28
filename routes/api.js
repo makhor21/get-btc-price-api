@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { InfluxDB, Point, HttpError } = require("@influxdata/influxdb-client");
+const { InfluxDB } = require("@influxdata/influxdb-client");
 
 const queryApi = new InfluxDB({
   url: process.env.URL,
